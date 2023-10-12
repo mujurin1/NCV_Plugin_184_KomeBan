@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net4.8-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="NicoLibrary">
+      <HintPath>C:\Program Files (x86)\posite-c\NiconamaCommentViewer\NicoLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="Plugin">
+      <HintPath>C:\Program Files (x86)\posite-c\NiconamaCommentViewer\Plugin.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
