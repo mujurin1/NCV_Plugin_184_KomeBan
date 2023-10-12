@@ -7,6 +7,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NCV_Plugin_184_KomeBan
@@ -219,11 +221,10 @@ namespace NCV_Plugin_184_KomeBan
         public void UpsertUser(string id, int no)
         {
             if (!DGVUsers.TryGetValue(id, out var dgvUser)) {
-                dgvUser = new DGV_User(this, id, no);
+                dgvUser = new DGV_User(this, id);
                 DGVUsers.Add(id, dgvUser);
-            } else {
-                dgvUser.ChangeNo(no);
             }
+                dgvUser.ChangeNo(no);
 
         }
 
@@ -249,8 +250,8 @@ namespace NCV_Plugin_184_KomeBan
         {
             public string Id { get; }
             public int CommnetUserIndex { get; private set; }
-            public List<int> DGV_RowIndexes { get; private set;}
-            public int MinCommentNo { get; private set; }
+            public List<int> DGV_RowIndexes { get; private set; }
+            public int MinCommentNo { get; private set; } = int.MaxValue;
             public string NoName { get; private set; }
 
             private readonly NCV_Data NCV_Data;
@@ -260,16 +261,21 @@ namespace NCV_Plugin_184_KomeBan
             /// </summary>
             private object CommnetUser { get; set; }
 
-            public DGV_User(NCV_Data ncv_data, string id, int no)
+
+            private object lock_object = new object();
+            //private Task change_task = Task.CompletedTask;
+
+            public DGV_User(NCV_Data ncv_data, string id)
             {
                 NCV_Data = ncv_data;
                 Id = id;
-                MinCommentNo = no;
-                NoName = $"#{no}";
 
                 Change_DGV_Name_All = delegate {
                     if (DGV_RowIndexes == null) {
                         CommnetUserIndex = ncv_data.DGV_CommnetUserIndexFromUserId(Id);
+                        // 他の放送に接続した時に残ってたりすると -1 になる
+                        if (CommnetUserIndex == -1) return;
+
                         CommnetUser = ncv_data.CommnetUserDataList[CommnetUserIndex];
                         DGV_RowIndexes = (List<int>)ncv_data.CommnetUserData_TYPE.InvokeMember(
                             "CommentIndexList",
@@ -278,7 +284,7 @@ namespace NCV_Plugin_184_KomeBan
                             CommnetUser,
                             null);
                     }
-
+                    
                     foreach (var index in DGV_RowIndexes) {
                         NCV_Data.DGV.Rows[index].Cells[2].Value = NoName;
                         NCV_Data.DGV.Rows[index].Cells[2].ToolTipText = Id;
@@ -296,12 +302,20 @@ namespace NCV_Plugin_184_KomeBan
                 NoName = $"#{no}";
 
                 // 全件修正
-                // この時点ではまだコメビュに変更するコメント行が存在しないので 5秒待機する
-                System.Threading.Tasks.Task.Run(async () => {
-                    await System.Threading.Tasks.Task.Delay(5000);
+                // この時点ではまだコメビュにコメント行が存在しないので５秒待機する
 
-                    // Formアプリのコントロールへの操作は同じスレッドじゃないと駄目
-                    NCV_Data.DGV.Invoke(Change_DGV_Name_All);
+                Task.Run(async () => {
+                    await Task.Delay(5000);
+                    lock (lock_object) {
+                        if (no != MinCommentNo) return;
+
+                        try {
+                            // Formアプリのコントロールへの操作は同じスレッドじゃないと駄目
+                            NCV_Data.DGV.Invoke(Change_DGV_Name_All);
+                        } catch (Exception e) {
+                            MessageBox.Show($"184コメ番プラグインでエラーが発生しました\n{e}");
+                        }
+                    }
                 });
             }
         }

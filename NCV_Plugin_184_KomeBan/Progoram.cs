@@ -1,7 +1,7 @@
 ﻿using Plugin;
 using System;
 using System.Linq;
-
+using System.Windows.Forms;
 
 namespace NCV_Plugin_184_KomeBan
 {
@@ -64,6 +64,7 @@ namespace NCV_Plugin_184_KomeBan
 
         private void Host_BroadcastConnected(object sender, EventArgs e)
         {
+            NCV_Data.DisconnectedLive();
         }
 
         private void Host_BroadcastDisConnected(object sender, EventArgs e)
@@ -84,9 +85,9 @@ namespace NCV_Plugin_184_KomeBan
                     cd.No is NOT_EXIST_NO_STR ||
                     !string.IsNullOrWhiteSpace(
                         Host.GetUserSettingInPlugin()
-                        .UserDataList
-                        .FirstOrDefault(ud => ud.UserId == cd.UserId)
-                        ?.NickName
+                            .UserDataList
+                            .FirstOrDefault(ud => ud.UserId == cd.UserId)
+                            ?.NickName
                     )
                 ) return;
 
@@ -96,12 +97,14 @@ namespace NCV_Plugin_184_KomeBan
                     .UserDataList;
 
                 var list = e.CommentDataList
+                    .AsEnumerable()
+                    .OrderBy(cd => int.Parse(cd.No))
                     .Distinct(LiveCommentDataEqualityComparer.Instance)
                     .Where(cd => cd.IsAnonymity)
-                    .Where(cd => !(cd.No is NOT_EXIST_NO_STR))
+                    .Where(cd => cd.No != NOT_EXIST_NO_STR)
                     .Where(cd => string.IsNullOrWhiteSpace(
                         userList
-                            .FirstOrDefault(x => x.UserId == cd.UserId)
+                            .FirstOrDefault(ud => ud.UserId == cd.UserId)
                             ?.NickName)
                     )
                     .ToArray();
