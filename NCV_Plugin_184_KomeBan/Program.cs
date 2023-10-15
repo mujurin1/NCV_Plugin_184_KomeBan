@@ -5,8 +5,10 @@ using System.Windows.Forms;
 
 namespace NCV_Plugin_184_KomeBan
 {
-    public class Progoram : IPlugin
+    public class Program : IPlugin
     {
+        public static Program Inctance { get; private set; }
+
         /// <summary>
         /// コメ番が存在しない放送でコメ番に入っている値
         /// </summary>
@@ -16,7 +18,7 @@ namespace NCV_Plugin_184_KomeBan
         /// <summary>
         /// プラグインのバージョン
         /// </summary>
-        public string Version => "1.0";
+        public string Version => "1.1";
 
         /// <summary>
         /// プラグインの説明
@@ -40,6 +42,11 @@ namespace NCV_Plugin_184_KomeBan
 
 
         private NCV_Data NCV_Data;
+
+        public Program()
+        {
+            Inctance = this;
+        }
 
         public void Run()
         {

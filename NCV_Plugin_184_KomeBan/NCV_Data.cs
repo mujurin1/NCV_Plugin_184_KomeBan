@@ -224,7 +224,7 @@ namespace NCV_Plugin_184_KomeBan
                 dgvUser = new DGV_User(this, id);
                 DGVUsers.Add(id, dgvUser);
             }
-                dgvUser.ChangeNo(no);
+            dgvUser.ChangeNo(no);
 
         }
 
@@ -284,7 +284,7 @@ namespace NCV_Plugin_184_KomeBan
                             CommnetUser,
                             null);
                     }
-                    
+
                     foreach (var index in DGV_RowIndexes) {
                         NCV_Data.DGV.Rows[index].Cells[2].Value = NoName;
                         NCV_Data.DGV.Rows[index].Cells[2].ToolTipText = Id;
@@ -306,6 +306,15 @@ namespace NCV_Plugin_184_KomeBan
 
                 Task.Run(async () => {
                     await Task.Delay(5000);
+
+                    if (!string.IsNullOrWhiteSpace(
+                        Program.Inctance.Host.GetUserSettingInPlugin()
+                            .UserDataList
+                            .FirstOrDefault(ud => ud.UserId == Id)
+                            .NickName)
+                    ) return;
+
+
                     lock (lock_object) {
                         if (no != MinCommentNo) return;
 
