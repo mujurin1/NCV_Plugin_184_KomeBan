@@ -18,7 +18,7 @@ namespace NCV_Plugin_184_KomeBan
         /// <summary>
         /// プラグインのバージョン
         /// </summary>
-        public string Version => "1.1";
+        public string Version => "1.1.1";
 
         /// <summary>
         /// プラグインの説明
@@ -103,9 +103,10 @@ namespace NCV_Plugin_184_KomeBan
                 var userList = Host.GetUserSettingInPlugin()
                     .UserDataList;
 
+
                 var list = e.CommentDataList
-                    .AsEnumerable()
-                    .OrderBy(cd => int.Parse(cd.No))
+                    //.AsEnumerable()
+                    //.OrderBy(cd => int.Parse(cd.No))
                     .Distinct(LiveCommentDataEqualityComparer.Instance)
                     .Where(cd => cd.IsAnonymity)
                     .Where(cd => cd.No != NOT_EXIST_NO_STR)
@@ -115,9 +116,6 @@ namespace NCV_Plugin_184_KomeBan
                             ?.NickName)
                     )
                     .ToArray();
-
-                if (list.Length == 0) return;
-
 
                 foreach (var data in list) {
                     NCV_Data.UpsertUser(data.UserId, int.Parse(data.No));

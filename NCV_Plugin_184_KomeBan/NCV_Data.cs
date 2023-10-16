@@ -262,8 +262,7 @@ namespace NCV_Plugin_184_KomeBan
             private object CommnetUser { get; set; }
 
 
-            private object lock_object = new object();
-            //private Task change_task = Task.CompletedTask;
+            private readonly object lock_object = new object();
 
             public DGV_User(NCV_Data ncv_data, string id)
             {
@@ -311,7 +310,7 @@ namespace NCV_Plugin_184_KomeBan
                         Program.Inctance.Host.GetUserSettingInPlugin()
                             .UserDataList
                             .FirstOrDefault(ud => ud.UserId == Id)
-                            .NickName)
+                            ?.NickName)
                     ) return;
 
 
